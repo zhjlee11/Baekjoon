@@ -6,8 +6,8 @@ def encode(n):
     num_str = ''
 
     for i in range(n):
-        k = list(map(int, input().split(" ")))
-        num_str += str(k[0]) * int(k[1])
+        char, num = input().split(" ")
+        num_str += char * int(num)
 
     return int(num_str)
 

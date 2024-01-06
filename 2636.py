@@ -10,6 +10,7 @@ class Grid:
         self.data = [[False for _ in range(self.m)] for _ in range(self.n)]
         self.adj = [[0 for _ in range(self.m)] for _ in range(self.n)]
         self.t = 0
+        self.previous_cheese_num = 0
 
     def get(self, x, y):
         if 1 <= x <= self.m and 1 <= y <= self.n:
@@ -27,10 +28,18 @@ class Grid:
         self.adj = [[0 for _ in range(self.m)] for _ in range(self.n)]
 
     def isEmpty(self):
+        result = True
         for row in self.data:
             if True in row:
-                return False
-        return True
+                result = False
+        return result
+
+    def count_cheese(self):
+        self.previous_cheese_num = 0
+        for row in self.data:
+            for ele in row:
+                if ele:
+                    self.previous_cheese_num+=1
 
     def visualize(self):
         for y in range(1, self.n + 1):
@@ -70,10 +79,11 @@ class Grid:
 
     def melt(self):
         self.t += 1
+        self.count_cheese()
         self.count_adj()
         for x in range(2, self.m):
             for y in range(2, self.n):
-                if self.adj[y-1][x-1] >= 2:
+                if self.adj[y-1][x-1] >= 1:
                     self.set(x, y, False)
         self.reset_adj()
 
@@ -93,4 +103,4 @@ while not grid.isEmpty():
     # print("\n")
 
 
-print(f"{grid.t}")
+print(f"{grid.t}\n{grid.previous_cheese_num}")
