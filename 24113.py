@@ -1,34 +1,34 @@
 import sys
+from copy import deepcopy
+
 input = sys.stdin.readline
 print = sys.stdout.write
 
-def encode(n):
-    num_str = ''
+arr1 = []
+arr2 = []
+arr_r = []
 
-    for i in range(n):
-        char, num = input().split(" ")
-        num_str += char * int(num)
+n1 = int(input())
+for i in range(n1):
+    arr1.append(list(map(int, input().split(" "))))
+n2 = int(input())
+for i in range(n2):
+    arr2.append(list(map(int, input().split(" "))))
 
-    return int(num_str)
+l1 = sum([c for _, c in arr1])
+l2 = sum([c for _, c in arr2])
+if l1>l2:
+    arr2.append([0, l1-l2])
+elif l1<l2:
+    arr1.append([0, l2-l1])
 
-def decode(n):
-    lastchar = str(n)[0]
-    num = 1
+while len(arr1)>0 or len(arr2)>0:
+    a, c1 = arr1.pop(0)
+    b, c2 = arr2.pop(0)
 
-    result=[]
-    for char in str(n)[1:]:
-        if char==lastchar:
-            num += 1
-        else :
-            result.append(f"{lastchar} {num}\n")
-            lastchar = char
-            num = 1
-    result.append(f"{lastchar} {num}\n")
-
-    print(f"{len(result)}\n")
-    for stri in result:
-        print(stri)
-
-num1 = encode(int(input()))
-num2 = encode(int(input()))
-decode(num1+num2)
+    if c1>c2:
+        arr_r.append([a+b, c2])
+        arr1.insert(0, [a, c1-c2])
+    elif c1>c2:
+        arr_r.append([a+b, c1])
+        arr1.insert(0, [b, c2-c1])

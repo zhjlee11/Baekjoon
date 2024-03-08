@@ -1,21 +1,23 @@
 import sys
-input = sys.stdin.readline
-print = lambda x: sys.stdout.write(f"{str(x)}\n")
+N = int(sys.stdin.readline().rstrip())
+K = int(sys.stdin.readline().rstrip())
 
-def scalar_product(scalr, array):
-    return [scalr*element for element in array]
+start = 1
+end = N * N
+result = 0
 
-def flatten(matrix):
-    result = []
-    for array in matrix:
-        result += array
-    return result
+while start <= end:
+    cnt = 0
 
-if __name__ == "__main__":
-    n = int(input())
-    k = int(input())
+    mid = (start + end) // 2
 
-    meaningful_n = n
-    for i in range(1, n+1):
-        if i**2>k:
-            meaningful_n = i
+    for div in range(1, N + 1):
+        cnt += min(mid // div, N)
+
+    if cnt >= K:
+        result = mid
+        end = mid - 1
+    else:
+        start = mid + 1
+
+print(result)
