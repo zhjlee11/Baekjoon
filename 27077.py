@@ -1,7 +1,7 @@
 # https://www.acmicpc.net/problem/27077
 import sys
-from copy import deepcopy
-input = sys.stdin.readline
+from functools import cmp_to_key
+input = lambda : sys.stdin.readline().replace("\n", "")
 #print = lambda x: sys.stdout.write(str(x))
 
 korea = "korea"
@@ -9,8 +9,6 @@ uruguay = "uruguay"
 ghana = "ghana"
 portugal = "portugal"
 
-cry = "cry"
-unhappy = "unhappy"
 
 class Team:
     def __init__(self,
@@ -26,41 +24,97 @@ class Team:
     def __str__(self):
         return self.teamname
 
-
-class Game:
+class TeamRapper:
     def __init__(self,
-                 team1: Team,
-                 team2: Team):
-        self.team1 = team1
-        self.team2 = team2
+                 team_korea: Team,
+                 team_uruguay: Team,
+                 team_ghana: Team,
+                 team_portugal: Team):
+        self.team_korea = team_korea
+        self.team_uruguay = team_uruguay
+        self.team_ghana = team_ghana
+        self.team_portugal = team_portugal
 
-        self.team1_score = 0
-        self.team2_score = 0
+        self.score_korea = 0
+        self.score_uruguay = 0
+        self.score_ghana = 0
+        self.score_portugal = 0
 
-    def goal_team1(self):
-        self.team1.gain_score += 1
-        self.team2.lose_score += 1
-        self.team1_score += 1
-
-    def goal_team2(self):
-        self.team2.gain_score += 1
-        self.team1.lose_score += 1
-        self.team2_score += 1
+    def goal(self, key: str):
+        if key == korea:
+            self.team_korea.gain_score += 1
+            self.team_portugal.lose_score += 1
+            self.score_korea += 1
+        elif key == uruguay:
+            self.team_uruguay.gain_score += 1
+            self.team_ghana.lose_score += 1
+            self.score_uruguay += 1
+        elif key == ghana:
+            self.team_ghana.gain_score += 1
+            self.team_uruguay.lose_score += 1
+            self.score_ghana += 1
+        elif key == portugal:
+            self.team_portugal.gain_score += 1
+            self.team_korea.lose_score += 1
+            self.score_portugal += 1
 
     def end_game(self):
-        if self.team1_score > self.team2_score:
-            self.team1.win_score += 3
-        elif self.team1_score < self.team2_score:
-            self.team2.win_score += 3
-        else:
-            self.team1.win_score += 1
-            self.team2.win_score += 1
+        bonus_korea = 0
+        bonus_uruguay = 0
+        bonus_ghana = 0
+        bonus_portugal = 0
 
-def sort_key(team: Team) -> int:
-    score = 10000*10000*team.win_score
-    score += 10000*(team.gain_score-team.lose_score)
-    score += team.gain_score
-    return score
+        if self.score_korea > self.score_portugal:
+            bonus_korea = 3
+        elif self.score_korea < self.score_portugal:
+            bonus_portugal = 3
+        else:
+            bonus_korea = 1
+            bonus_portugal = 1
+
+        if self.score_uruguay > self.score_ghana:
+            bonus_uruguay = 3
+        elif self.score_uruguay < self.score_ghana:
+            bonus_ghana = 3
+        else:
+            bonus_uruguay = 1
+            bonus_ghana = 1
+
+        teams = [(self.team_korea, bonus_korea),
+                 (self.team_uruguay, bonus_uruguay),
+                 (self.team_ghana, bonus_ghana),
+                 (self.team_portugal, bonus_portugal)]
+
+        teams.sort(key=cmp_to_key(compare), reverse=True)
+
+        korea_ind = 0
+        for ind, (team, bonus) in enumerate(teams):
+            if str(team)==korea:
+                korea_ind = ind
+                break
+        return "cry" if (0 <= korea_ind <= 1) and compare(teams[korea_ind], teams[2]) > 0 else "unhappy"
+
+def compare(t1, t2):
+    team1, bonus1 = t1
+    team2, bonus2 = t2
+
+    if team1.win_score+bonus1 > team2.win_score+bonus2:
+        return 1
+    elif team1.win_score+bonus1 < team2.win_score+bonus2:
+        return -1
+    else:
+        if (team1.gain_score-team1.lose_score) > (team2.gain_score-team2.lose_score):
+            return 1
+        elif (team1.gain_score-team1.lose_score) < (team2.gain_score-team2.lose_score):
+            return -1
+        else:
+            if team1.gain_score > team2.gain_score:
+                return 1
+            elif team1.gain_score < team2.gain_score:
+                return -1
+            else:
+                return 0
+
 
 if __name__ == "__main__":
     # Initialize Variable
@@ -74,35 +128,13 @@ if __name__ == "__main__":
     N = int(input())
     for _ in range(N):
         score.append(input())
+    teamRapper = TeamRapper(*teams)
 
     # Compute
-    game_kp = Game(teams[0], teams[3])
-    game_ug = Game(teams[2], teams[1])
-
-    teams.sort(key=sort_key, reverse=True)
-    print(list(map(str, teams)))
-    result.append("cry" if korea == str(teams[0]) or korea == str(teams[1]) else "unhappy")
-
+    result.append(teamRapper.end_game())
     for goal_team in score:
-        if goal_team == korea:
-            game_kp.goal_team1()
-        elif goal_team == portugal:
-            game_kp.goal_team2()
-        elif goal_team == uruguay:
-            game_ug.goal_team1()
-        else:
-            game_ug.goal_team2()
+        teamRapper.goal(goal_team)
+        result.append(teamRapper.end_game())
 
-        old_teamlist = deepcopy(teams)
-
-        game_kp.end_game()
-        game_ug.end_game()
-
-        teams = [game_kp.team1, game_kp.team2, game_ug.team1, game_ug.team2]
-        teams.sort(key=sort_key, reverse=True)
-        print(list(map(str, teams)))
-        result.append("cry" if korea == str(teams[0]) or korea == str(teams[1]) else "unhappy")
-
-        teams = old_teamlist
     # Print
     print("\n".join(result))
